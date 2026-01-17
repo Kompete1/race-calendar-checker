@@ -1,3 +1,5 @@
+import { runWorkflow } from "@/agent/workflow";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://kompete1.github.io",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
@@ -5,16 +7,39 @@ const corsHeaders = {
 };
 
 export async function GET() {
-  const body = {
-    status: "stub",
-    summary: "Phase 3 agent not connected yet.",
-    ts: new Date().toISOString(),
-  };
+  const ts = new Date().toISOString();
 
-  return new Response(JSON.stringify(body), {
-    status: 200,
-    headers: corsHeaders,
-  });
+  try {
+    const instruction =
+      "Check the MSA race calendar page for changes since the last seen/baseline and return a short update summary.";
+    const result = await runWorkflow({ input_as_text: instruction });
+
+    return new Response(
+      JSON.stringify({
+        status: "ok",
+        summary: result.output_text,
+        ts,
+      }),
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    );
+  } catch (error) {
+    const summary = error instanceof Error ? error.message : "Unknown error";
+
+    return new Response(
+      JSON.stringify({
+        status: "error",
+        summary,
+        ts,
+      }),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
+  }
 }
 
 export async function OPTIONS() {
