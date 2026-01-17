@@ -39,7 +39,11 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
         ...conversationHistory
       ]
     );
-    conversationHistory.push(...myAgentResultTemp.newItems.map((item) => item.rawItem));
+    conversationHistory.push(
+      ...myAgentResultTemp.newItems.map(
+        (item: { rawItem: AgentInputItem }) => item.rawItem
+      )
+    );
 
     if (!myAgentResultTemp.finalOutput) {
         throw new Error("Agent result is undefined");
